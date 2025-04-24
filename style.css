@@ -1,0 +1,147 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: sans-serif;
+    height: 100vh;
+    width: 100vw;
+    background-color:black
+  }
+  
+  .bg.full {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+  }
+  
+  .hidden {
+    display: none;
+  }
+  
+  #webcam-canvas {
+
+  }
+
+  #canvas-container {
+    box-sizing: border-box;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 320px;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    border-radius:20px
+  }
+  
+  #ui {
+    position: absolute;
+    top: 10px;
+    left: 10px;;
+    z-index: 1;
+    width: 320px;
+    height: calc(100vh - 20px); 
+    pointer-events: none;
+    background-color: rgb(4, 39, 64, 0.4);
+    border-radius:20px;
+    border: 2px solid white;
+    
+  }
+
+  .ui-content {
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    justify-content: space-between;
+    max-width: 320px;
+  }
+  
+  .mode {
+    color: white;
+    padding: 2rem;
+    pointer-events: auto;
+  }
+  
+  #controls {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 3;
+    pointer-events: auto;
+    display:flex;
+    flex-direction: row;
+    justify-content: space-between; 
+    align-items: stretch;
+    width: 300px;
+    box-sizing: border-box;
+  }
+  
+  .controls-button {
+    margin: 5px;
+    padding: 10px 10px 5px 10px;
+    font-size: 20px;
+    font-family: 'Acumin';
+    text-align: center;
+    background-color: aqua;
+    border-radius:20px;
+    flex-shrink: 0;
+  }
+  
+  #draw-area {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .draw-rect {
+    position: absolute;
+    background: rgba(255, 0, 0, 0.4);
+    border: 1px solid red;
+    pointer-events: none;
+  }
+  
+  #cyst {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background: url('assets/cyst.png') no-repeat center/contain;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  @font-face {
+    font-family: 'Acumin';
+    src: url('Acumin-RPro.otf') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Acumin';
+    src: url('Acumin-BdPro.otf') format('opentype');
+    font-weight: 700;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Acumin';
+    src: url('Acumin-ItPro.otf') format('opentype');
+    font-weight: 400;
+    font-style: italic;
+  }
+
+  @font-face {
+    font-family: 'Acumin';
+    src: url('Acumin-BdItPro.otf') format('opentype');
+    font-weight: 700;
+    font-style: italic;
+  }

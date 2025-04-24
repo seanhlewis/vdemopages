@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Visician VR — Web demo</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    *,*:before,*:after{box-sizing:border-box;font-family:system-ui,Arial,sans-serif}
+    body{margin:0;color:#fff;overflow-x:hidden;}
+    .hidden{display:none!important;}
+    .cursor{position:fixed;width:16px;height:16px;border:3px solid #fff;border-radius:50%;
+            pointer-events:none;z-index:60;}
+
+    /* backgrounds */
+    .bg{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;}
+    #safe-overlay{position:fixed;inset:0;z-index:5;pointer-events:none;opacity:0;
+                  transition:opacity .3s; width: 100%; height: 100%;}
+
+    /* main column */
+    #ui{position:relative;z-index:10;display:flex;flex-direction:column;gap:1rem;
+        padding:1rem 1.5rem 4rem;max-width:clamp(320px,90vw,800px);}
+
+    /* webcam */
+    #canvas-container{position:relative;width:100%;}
+    #webcam-canvas{width:100%;height:auto;border-radius:10px;max-height:70vh;}
+
+    /* panels / buttons */
+    .mode{width:100%;background:rgba(0,0,0,.55);padding:1rem;border-radius:10px;}
+    h2{margin:.2em 0 .6em;font-size:1.3rem}
+    p{margin:.35em 0;line-height:1.45}
+    .controls-button{margin:4px 8px;padding:6px 16px;border:none;border-radius:6px;
+                     font-size:1rem;font-weight:600;cursor:pointer;color:#fff;
+                     background:#365bff;}
+    .controls-button:hover{background:#274dff}
+
+    /* icon buttons */
+    .icon-btn{position:fixed;top:12px;width:38px;height:38px;border:none;border-radius:50%;
+              background:#00000088 url() center/70% no-repeat;cursor:pointer;z-index:50;}
+    #calibrate-btn{right:12px;background-image:url(assets/calibrate_icon.png);}
+    #safety-btn   {right:58px;background-image:url(assets/safety_icon.png);}
+    #settings-btn {right:104px;background-image:url(assets/settings_icon.png);}
+
+    /* debug */
+    #debug-btn{position:fixed;bottom:10px;right:10px;width:52px;height:26px;border:none;
+               border-radius:13px;background:rgba(0,0,0,.25);color:#fff;font-size:12px;
+               font-weight:700;cursor:pointer;z-index:70;}
+               .debug-marker{                /* on-webcam dot – must catch the mouse */
+  position:absolute;width:20px;height:20px;border-radius:50%;
+  cursor:grab;pointer-events:auto;z-index:50;box-shadow:0 0 6px #000;
+}
+.debug-shadow{                /* full-screen twin (visual only) */
+  position:fixed;width:20px;height:20px;border-radius:50%;
+  pointer-events:none;z-index:30;transform:translate(-50%,-50%);
+}
+  </style>
+</head>
+<body>
+
+  <!-- backgrounds -->
+  <div id="backgrounds">
+    <img id="bg-loading"     class="bg hidden" src="assets/v_loading.png">
+    <img id="bg-calibration" class="bg hidden" src="assets/v_loading.png"> <!--I changed it from v_bg.png since v_loading is cuter for calibration-->
+    <img id="bg-incision"    class="bg hidden" src="assets/cyst1.png">
+    <img id="bg-extraction"  class="bg hidden" src="assets/cyst2.png">
+    <img id="bg-suturing"    class="bg hidden" src="assets/cyst2.png">
+    <img id="bg-review"      class="bg hidden" src="assets/cyst3.png">
+  </div>
+  <img id="safe-overlay" src="assets/overlay.png" alt="overlay">
+
+  <!-- icon buttons -->
+  <button id="settings-btn"  class="icon-btn" title="Settings"></button>
+  <button id="safety-btn"    class="icon-btn" title="Safety view"></button>
+  <button id="calibrate-btn" class="icon-btn" title="Re-calibrate"></button>
+
+  <!-- main UI column -->
+  <div id="ui">
+
+    <div id="canvas-container">
+      <canvas id="webcam-canvas" width="300" height="225"></canvas>
+      <div id="debug-layer" style="position:absolute;inset:0;pointer-events:none;"></div>
+    </div>
+
+    <!-- step panels -->
+    <div id="loading-screen" class="mode ui-content">
+      <h2>Welcome!</h2>
+      <p>Welcome to a <strong>demo</strong> of my
+         Visician VR controllers.</p>
+      <p>Once your webcam is ready we’ll move on automatically.</p>
+    </div>
+
+    <div id="calibration-screen" class="mode hidden">
+      <h2>Step&nbsp;1 · Calibrate the controllers</h2>
+      <p>Hold the <em>stylus</em> (yellow) tip to the camera and click it to
+         lock on. Repeat for the two <em>hinge</em> tips (green and red).</p>
+    </div>
+
+    <div id="incision-screen" class="mode hidden">
+      <h2>Step&nbsp;2 · Make the skin incision</h2>
+      <p>Use the stylus (white circle shows the tip). Hold
+         <kbd>Space</kbd> and trace a small ellipse over the cyst. Press
+         <b>Clear</b> to retry, <b>Next</b> when satisfied.</p>
+    </div>
+
+    <div id="extraction-screen" class="mode hidden">
+      <h2>Step&nbsp;3 · Drain / extract the cyst</h2>
+      <p>Pinch the hinge tips together to grab the cyst and move it to
+         the tray. <b>Clear</b> resets; <b>Next</b> continues.</p>
+    </div>
+
+    <div id="suturing-screen" class="mode hidden">
+      <h2>Step&nbsp;4 · Suture the wound</h2>
+      <p>Hold <kbd>Space</kbd> with the stylus to place stitches. Press
+         <b>Next</b> to finish.</p>
+    </div>
+
+    <div id="review-screen" class="mode hidden">
+      <h2>Finished · Review</h2>
+      <p>Thanks for trying out Visician VR! Hopefully we might see tools like this in the future
+         being used to train surgeons. </p><p>Press <b>Next</b> to restart the demo.</p>
+    </div>
+
+    <!-- global controls -->
+    <div id="controls">
+      <button id="clear" class="controls-button">Clear</button>
+      <button id="next"  class="controls-button">Next</button>
+    </div>
+  </div><!-- /ui -->
+
+  <!-- debug toggle -->
+  <button id="debug-btn">DBG</button>
+
+  <script src="script.js"></script>
+</body>
+</html>
